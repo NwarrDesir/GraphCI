@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { db, auth } from '@/lib/firebase/admin';
 
+// Force cette route à être dynamique (pas de pré-rendu statique)
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/user/me
  * 
