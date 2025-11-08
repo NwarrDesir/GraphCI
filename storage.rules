@@ -1,0 +1,54 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+    
+    function isValidSize() {
+      // Limite à 5 MB
+      return request.resource.size < 5 * 1024 * 1024;
+    }
+    
+    // Photos de profil utilisateurs
+    match /users/{userId}/profile/{fileName} {
+      // Tout le monde peut lire
+      allow read: if true;
+      
+      // Seul le propriétaire peut uploader
+      allow write: if isAuthenticated() 
+        && isOwner(userId)
+        && isImage()
+        && isValidSize();
+    }
+    
+    // Photos de vendeurs (pour futurs features)
+    match /vendors/{vendorId}/photos/{fileName} {
+      // Tout le monde peut lire
+      allow read: if true;
+      
+      // Utilisateurs connectés peuvent uploader
+      allow create: if isAuthenticated()
+        && isImage()
+        && isValidSize();
+      
+      // Seul l'uploader ou admin peut supprimer
+      allow delete: if false; // Pour l'instant, personne
+    }
+    
+    // Autres fichiers - interdits par défaut
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,233 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    // Collection: reports (signalements de vendeurs)
+    match /reports/{reportId} {
+      // Tout le monde peut lire les signalements
+      allow read: if true;
+      
+      // Seuls les utilisateurs connectés peuvent créer des signalements
+      allow create: if isAuthenticated()
+        && request.resource.data.keys().hasAll(['lat', 'lon', 'product', 'city', 'timestamp', 'user_id'])
+        && request.resource.data.lat is number
+        && request.resource.data.lon is number
+        && request.resource.data.product is string
+        && request.resource.data.city is string
+        && request.resource.data.timestamp is timestamp
+        && request.resource.data.user_id == request.auth.uid;
+      
+      // Seul le créateur peut modifier ou supprimer
+      allow update, delete: if isAuthenticated() 
+        && resource.data.user_id == request.auth.uid;
+    }
+    
+    // Collection: vendors (vendeurs fusionnés - créés par Cloud Functions)
+    match /vendors/{vendorId} {
+      // Tout le monde peut lire
+      allow read: if true;
+      
+      // Seules les Cloud Functions peuvent écrire (via service account)
+      // En attendant, on autorise la création pour les tests
+      allow create, update: if isAuthenticated();
+      
+      // Seuls les admins peuvent supprimer
+      allow delete: if false;
+    }
+    
+    // Collection: stats (statistiques globales)
+    match /stats/{statId} {
+      // Tout le monde peut lire
+      allow read: if true;
+      
+      // Seules les Cloud Functions peuvent écrire
+      allow write: if false;
+    }
+    
+    // Collection: cities (données des villes)
+    match /cities/{cityId} {
+      // Tout le monde peut lire
+      allow read: if true;
+      
+      // Personne ne peut modifier (données statiques)
+      allow write: if false;
+    }
+    
+    // Collection: users (profils utilisateurs du réseau social)
+    match /users/{userId} {
+      // Tout le monde peut lire les profils publics (pour le graphe)
+      allow read: if true;
+      
+      // Chacun peut créer/modifier son propre profil
+      allow create: if isAuthenticated() 
+        && isOwner(userId)
+        && request.resource.data.keys().hasAll(['id', 'idUnique', 'lat', 'lon', 'showRealName', 'showLocation', 'createdAt', 'friendCount']);
+      
+      allow update: if isAuthenticated() && isOwner(userId);
+      
+      // Pas de suppression
+      allow delete: if false;
+    }
+    
+    // Collection: friendships (liens d'amitié)
+    match /friendships/{friendshipId} {
+      // Seuls les deux participants peuvent lire leur amitié
+      allow read: if isAuthenticated() 
+        && (request.auth.uid == resource.data.userId1 || request.auth.uid == resource.data.userId2);
+      
+      // Création seulement si l'utilisateur est l'un des deux participants
+      allow create: if isAuthenticated()
+        && (request.auth.uid == request.resource.data.userId1 || request.auth.uid == request.resource.data.userId2)
+        && request.resource.data.keys().hasAll(['userId1', 'userId2', 'status', 'createdAt']);
+      
+      // Mise à jour seulement pour accepter/bloquer
+      allow update: if isAuthenticated()
+        && (request.auth.uid == resource.data.userId1 || request.auth.uid == resource.data.userId2);
+      
+      // Suppression par les deux participants
+      allow delete: if isAuthenticated()
+        && (request.auth.uid == resource.data.userId1 || request.auth.uid == resource.data.userId2);
+    }
+    
+    // Collection: friendCodes (codes temporaires pour ajouter des amis)
+    match /friendCodes/{codeId} {
+      // Tout le monde peut lire pour valider un code
+      allow read: if true;
+      
+      // Seul le propriétaire peut créer son code
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.keys().hasAll(['code', 'userId', 'expiresAt', 'used']);
+      
+      // Mise à jour pour marquer comme utilisé
+      allow update: if isAuthenticated()
+        && !resource.data.used
+        && request.resource.data.used == true;
+      
+      // Pas de suppression (auto-cleanup par Cloud Function)
+      allow delete: if false;
+    }
+    
+    // Collection: messages (messages entre amis)
+    match /messages/{messageId} {
+      // Seuls expéditeur et destinataire peuvent lire
+      allow read: if isAuthenticated()
+        && (request.auth.uid == resource.data.from || request.auth.uid == resource.data.to);
+      
+      // Seul l'expéditeur peut créer
+      allow create: if isAuthenticated()
+        && request.resource.data.from == request.auth.uid
+        && request.resource.data.keys().hasAll(['from', 'to', 'text', 'timestamp', 'read']);
+      
+      // Seul le destinataire peut marquer comme lu
+      allow update: if isAuthenticated()
+        && request.auth.uid == resource.data.to
+        && request.resource.data.read == true;
+      
+      // Expéditeur et destinataire peuvent supprimer
+      allow delete: if isAuthenticated()
+        && (request.auth.uid == resource.data.from || request.auth.uid == resource.data.to);
+    }
+    
+    // Collection: conversations (métadonnées des conversations)
+    match /conversations/{conversationId} {
+      // Seuls les participants peuvent lire
+      allow read: if isAuthenticated()
+        && request.auth.uid in resource.data.participants;
+      
+      // Seuls les participants peuvent créer/modifier
+      allow create, update: if isAuthenticated()
+        && request.auth.uid in request.resource.data.participants;
+      
+      // Pas de suppression
+      allow delete: if false;
+    }
+    
+    // Collection: friendshipTests (tests d'amitié créés par les utilisateurs)
+    match /friendshipTests/{testId} {
+      // Tout le monde peut lire les tests (pour les passer)
+      allow read: if true;
+      
+      // Seul le créateur peut créer/modifier son test
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid;
+      
+      allow update: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+      
+      // Seul le créateur peut supprimer
+      allow delete: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+    }
+    
+    // Collection: friendshipTestAttempts (tentatives de tests)
+    match /friendshipTestAttempts/{attemptId} {
+      // Seuls le créateur du test et celui qui a tenté peuvent lire
+      allow read: if isAuthenticated()
+        && (request.auth.uid == resource.data.testOwnerId 
+         || request.auth.uid == resource.data.attemptedBy);
+      
+      // Seul l'utilisateur peut créer sa propre tentative
+      allow create: if isAuthenticated()
+        && request.resource.data.attemptedBy == request.auth.uid;
+      
+      // Pas de modification ni suppression
+      allow update, delete: if false;
+    }
+    
+    // Collection: friendRequests (demandes d'amitié)
+    match /friendRequests/{requestId} {
+      // Seuls expéditeur et destinataire peuvent lire
+      allow read: if isAuthenticated()
+        && (request.auth.uid == resource.data.from 
+         || request.auth.uid == resource.data.to);
+      
+      // Seul l'expéditeur peut créer
+      allow create: if isAuthenticated()
+        && request.resource.data.from == request.auth.uid;
+      
+      // Seul le destinataire peut répondre (update)
+      allow update: if isAuthenticated()
+        && request.auth.uid == resource.data.to;
+      
+      // Les deux peuvent supprimer
+      allow delete: if isAuthenticated()
+        && (request.auth.uid == resource.data.from 
+         || request.auth.uid == resource.data.to);
+    }
+    
+    // Collection: messages (messagerie en temps réel)
+    match /messages/{messageId} {
+      // Seuls expéditeur et destinataire peuvent lire
+      allow read: if isAuthenticated()
+        && (request.auth.uid == resource.data.from 
+         || request.auth.uid == resource.data.to
+         || request.auth.uid in resource.data.participants);
+      
+      // Seul l'expéditeur peut créer
+      allow create: if isAuthenticated()
+        && request.resource.data.from == request.auth.uid
+        && request.resource.data.keys().hasAll(['from', 'to', 'text', 'timestamp', 'read', 'participants'])
+        && request.auth.uid in request.resource.data.participants;
+      
+      // Seul le destinataire peut marquer comme lu (update)
+      allow update: if isAuthenticated()
+        && request.auth.uid == resource.data.to
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      
+      // Les deux peuvent supprimer
+      allow delete: if isAuthenticated()
+        && (request.auth.uid == resource.data.from 
+         || request.auth.uid == resource.data.to);
+    }
+  }
+}
