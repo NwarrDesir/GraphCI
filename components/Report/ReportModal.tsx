@@ -34,7 +34,7 @@ export default function ReportModal({ isOpen, onClose }: ReportModalProps) {
         .then(info => {
           setLocationInfo(info);
           if (!info.isInCoteDIvoire) {
-            setError('Vous devez être en Côte d\'Ivoire pour signaler un vendeur');
+            setError('Vous devez être en Côte d\'Ivoire pour créer un signalement');
           }
         })
         .catch(err => {
@@ -111,7 +111,7 @@ export default function ReportModal({ isOpen, onClose }: ReportModalProps) {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold flex items-center space-x-2">
             <FaMapMarkerAlt />
-            <span>Signaler un vendeur</span>
+            <span>Créer un signalement</span>
           </h2>
           <button
             onClick={onClose}
@@ -188,7 +188,7 @@ export default function ReportModal({ isOpen, onClose }: ReportModalProps) {
             {/* Vendor name */}
             <div>
               <label className="block text-sm font-medium mb-2">
-                Nom du vendeur (optionnel)
+                Nom (optionnel)
               </label>
               <input
                 type="text"

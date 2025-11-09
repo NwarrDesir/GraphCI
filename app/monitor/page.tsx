@@ -84,7 +84,7 @@ export default function MonitorPage() {
         body: JSON.stringify({ count: 5 }),
       });
       const data = await res.json();
-      setMessage(`Cluster créé : ${data.count} vendeurs`);
+      setMessage(`Cluster créé : ${data.count} utilisateurs`);
       await fetchStats();
     } catch (error) {
       setMessage('Erreur lors de la création du cluster');

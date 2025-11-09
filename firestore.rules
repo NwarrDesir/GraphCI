@@ -11,7 +11,7 @@ service cloud.firestore {
       return request.auth.uid == userId;
     }
     
-    // Collection: reports (signalements de vendeurs)
+    // Collection: reports (signalements d'utilisateurs)
     match /reports/{reportId} {
       // Tout le monde peut lire les signalements
       allow read: if true;
@@ -31,7 +31,7 @@ service cloud.firestore {
         && resource.data.user_id == request.auth.uid;
     }
     
-    // Collection: vendors (vendeurs fusionnés - créés par Cloud Functions)
+    // Collection: vendors (utilisateurs fusionnés - créés par Cloud Functions)
     match /vendors/{vendorId} {
       // Tout le monde peut lire
       allow read: if true;

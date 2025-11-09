@@ -10,7 +10,7 @@ import { db } from '@/lib/firebase/admin';
 
 export async function DELETE(request: NextRequest) {
   try {
-    // Supprimer l'ancienne collection 'reports' (vendeurs)
+    // Supprimer l'ancienne collection 'reports'
     const reportsSnapshot = await db.collection('reports').get();
     
     if (reportsSnapshot.empty) {
@@ -34,7 +34,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({
       success: true,
       deleted: count,
-      message: `${count} ancien(s) signalement(s) de vendeurs supprimé(s)`,
+      message: `${count} ancien(s) signalement(s) supprimé(s)`,
     });
 
   } catch (error: any) {

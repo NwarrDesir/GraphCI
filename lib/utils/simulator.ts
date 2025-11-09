@@ -26,7 +26,7 @@ const CITY_COORDINATES: Record<string, { lat: number; lon: number; radius: numbe
   'Abengourou': { lat: 6.7294, lon: -3.4961, radius: 0.02 },   // ~2km - Est, près Ghana
 };
 
-// Noms de vendeurs typiques ivoiriens
+// Noms typiques ivoiriens
 const VENDOR_NAMES = [
   'Tante Marie',
   'Amadou',
@@ -71,7 +71,7 @@ export function generateRandomCoordinates(city: string): { lat: number; lon: num
 }
 
 /**
- * Génère un nom de vendeur aléatoire (50% de chance d'avoir un nom)
+ * Génère un nom aléatoire (50% de chance d'avoir un nom)
  */
 export function generateRandomVendorName(): string | undefined {
   if (Math.random() < 0.5) {
@@ -151,14 +151,14 @@ export function generateCluster(
  */
 export function generateTestScenario(): SimulatedReport[] {
   return [
-    // Marché d'Adjamé (Abidjan) - Cluster de vendeurs
+    // Marché d'Adjamé (Abidjan) - Cluster d'utilisateurs
     ...generateCluster('Abidjan', 'attiéké', 5),
     ...generateCluster('Abidjan', 'poisson_braisé', 3),
     
-    // Bouaké - Vendeurs dispersés
+    // Bouaké - Utilisateurs dispersés
     ...generateMultipleReports(8, 'Bouaké'),
     
-    // Yamoussoukro - Quelques vendeurs
+    // Yamoussoukro - Quelques utilisateurs
     ...generateMultipleReports(5, 'Yamoussoukro'),
     
     // Autres villes - Distribution réaliste

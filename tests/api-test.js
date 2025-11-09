@@ -104,7 +104,7 @@ const tests = [
 
 // Exécution
 (async () => {
-  log('\n🧪 Test Suite API - Map Vendeurs CI\n', 'blue');
+  log('\n🧪 Test Suite API - GraphCI\n', 'blue');
   log(`Base URL: ${BASE_URL}\n`, 'yellow');
 
   let passed = 0;

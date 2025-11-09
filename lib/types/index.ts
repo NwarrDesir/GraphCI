@@ -1,7 +1,7 @@
 import { Timestamp } from 'firebase/firestore';
 
 /**
- * Type représentant un vendeur consolidé
+ * Type représentant un utilisateur consolidé
  */
 export interface Vendor {
   id: string;

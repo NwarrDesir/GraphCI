@@ -169,7 +169,7 @@ export default function SimulatorPanel() {
         >
           <span className="flex items-center space-x-2">
             <FaLayerGroup />
-            <span className="text-sm">Cluster de 5 vendeurs proches</span>
+            <span className="text-sm">Cluster de 5 utilisateurs proches</span>
           </span>
           <span className="text-xs text-gray-400">&lt;30m</span>
         </button>

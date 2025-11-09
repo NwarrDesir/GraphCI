@@ -326,7 +326,7 @@ export default function StatsPage() {
     labels: stats.topCities.map(c => c.city),
     datasets: [
       {
-        label: 'Vendeurs par ville',
+        label: 'Utilisateurs par ville',
         data: stats.topCities.map(c => c.count),
         backgroundColor: 'rgba(34, 197, 94, 0.8)',
         borderColor: 'rgba(34, 197, 94, 1)',
@@ -385,7 +385,7 @@ export default function StatsPage() {
               <span className="text-xs text-green-400">+{stats.growthRate}%</span>
             </div>
             <div className="text-4xl font-bold">{stats.totalVendors}</div>
-            <div className="text-sm text-gray-400 mt-1">Vendeurs Actifs</div>
+            <div className="text-sm text-gray-400 mt-1">Utilisateurs Actifs</div>
           </div>
 
           <div className="glass p-6 rounded-xl">
@@ -401,7 +401,7 @@ export default function StatsPage() {
               <FaShoppingCart className="text-green-400 text-2xl" />
             </div>
             <div className="text-4xl font-bold">{stats.avgReportsPerVendor.toFixed(1)}</div>
-            <div className="text-sm text-gray-400 mt-1">Signalements / Vendeur</div>
+            <div className="text-sm text-gray-400 mt-1">Signalements / Utilisateur</div>
           </div>
 
           <div className="glass p-6 rounded-xl">
@@ -423,7 +423,7 @@ export default function StatsPage() {
             <div>
               <div className="text-sm text-gray-400 mb-1">Densité du Réseau</div>
               <div className="text-3xl font-bold">{stats.networkDensity.toFixed(2)}%</div>
-              <div className="text-xs text-gray-500 mt-1">Taux de connexion entre vendeurs</div>
+              <div className="text-xs text-gray-500 mt-1">Taux de connexion entre utilisateurs</div>
             </div>
             <div>
               <div className="text-sm text-gray-400 mb-1">Clusters Détectés</div>
@@ -433,7 +433,7 @@ export default function StatsPage() {
             <div>
               <div className="text-sm text-gray-400 mb-1">Taille Moyenne Cluster</div>
               <div className="text-3xl font-bold">{stats.clusterAnalysis.avgClusterSize.toFixed(1)}</div>
-              <div className="text-xs text-gray-500 mt-1">Vendeurs par cluster</div>
+              <div className="text-xs text-gray-500 mt-1">Utilisateurs par cluster</div>
             </div>
           </div>
         </div>
@@ -484,7 +484,7 @@ export default function StatsPage() {
                 <tr className="border-b border-white/10">
                   <th className="text-left py-3 px-4 text-sm text-gray-400">Rang</th>
                   <th className="text-left py-3 px-4 text-sm text-gray-400">Ville</th>
-                  <th className="text-right py-3 px-4 text-sm text-gray-400">Vendeurs</th>
+                  <th className="text-right py-3 px-4 text-sm text-gray-400">Utilisateurs</th>
                   <th className="text-right py-3 px-4 text-sm text-gray-400">Part de marché</th>
                   <th className="text-left py-3 px-4 text-sm text-gray-400">Tendance</th>
                 </tr>
